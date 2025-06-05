@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
 
 from cinema.models import Movie, CinemaHall, Genre, Actor, MovieSession
 
@@ -18,22 +19,48 @@ class GenreSerializer(serializers.ModelSerializer):
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ["id", "first_name", "last_name"]
+        fields = ["id", "first_name", "last_name", "full_name"]
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    genres = GenreSerializer(many=True, read_only=True)
-    actors = ActorSerializer(many=True, read_only=True)
+    genres = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Genre.objects.all()
+    )
+    actors = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Actor.objects.all()
+    )
 
     class Meta:
         model = Movie
         fields = [
             "id",
+            "title",
             "description",
             "duration",
             "genres",
             "actors"
         ]
+
+
+class MovieListSerializer(MovieSerializer):
+    genres = SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="name"
+    )
+    actors = SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )
+
+
+class MovieRetrieveSerializer(MovieSerializer):
+    genres = GenreSerializer(many=True, read_only=True)
+    actors = ActorSerializer(many=True, read_only=True)
+
 
 class MovieSessionSerializer(serializers.ModelSerializer):
     movie = MovieSerializer(read_only=True)
