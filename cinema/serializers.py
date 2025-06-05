@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
+from rest_framework.relations import SlugRelatedField, StringRelatedField
 
 from cinema.models import Movie, CinemaHall, Genre, Actor, MovieSession
 
@@ -50,11 +50,7 @@ class MovieListSerializer(MovieSerializer):
         read_only=True,
         slug_field="name"
     )
-    actors = SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field="full_name"
-    )
+    actors = StringRelatedField(many=True)
 
 
 class MovieRetrieveSerializer(MovieSerializer):
